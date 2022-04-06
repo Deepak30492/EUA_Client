@@ -1,6 +1,7 @@
 package com.abdm.eua.dhp;
 
 import com.abdm.eua.dhp.schema.EuaRequestBody;
+import com.abdm.eua.dhp.schema.EuaRequestBodyStatus;
 import com.abdm.eua.dhp.schema.ack.AckResponse;
 import com.abdm.eua.dhp.schema.onconfirm.OnConfirmRequest;
 import com.abdm.eua.dhp.schema.oninit.OnInitRequest;
@@ -16,17 +17,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +59,35 @@ public class DHPController {
 
 	}
 
-	@PostMapping("/on_search")
+	@MessageMapping("/get-response-by-msgId")
+	@SendTo("/client/flutter")
+	public ResponseEntity<List<Optional<Message>>> getMessageById(Message message) {
+		try {
+
+			List<Optional<Message>> messageFromDb = messageRepository.findByDhpQueryTypeAndClientId(message.getDhpQueryType(), message.getClientId());
+
+
+			if (messageFromDb.isEmpty()) {
+
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+
+			} else {
+
+				return new ResponseEntity<>(messageFromDb, HttpStatus.OK);
+
+			}
+
+		} catch (Exception e) {
+
+			LOGGER.error(e.toString());
+
+			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@MessageMapping("/on_search")
+	@SendTo("/client/flutter")
+//	@PostMapping("/on_search")
 	public ResponseEntity<AckResponse> onSearch(@RequestBody OnSearchRequest onRequest) throws Exception {
 
 		LOGGER.info("Inside on_search API ");
@@ -122,8 +150,9 @@ public class DHPController {
 
 		}
 	}
-
-	@PostMapping("/on_select")
+	@MessageMapping("/on_select")
+	@SendTo("/client/flutter")
+//	@PostMapping("/on_select")
 	public ResponseEntity<AckResponse> onSelect(@RequestBody EuaRequestBody onSelectRequest) throws Exception {
 
 		LOGGER.info("Inside on_select API ");
@@ -159,7 +188,9 @@ public class DHPController {
 
 	}
 
-	@PostMapping("/on_init")
+	@MessageMapping("/on_init")
+	@SendTo("/client/flutter")
+//	@PostMapping("/on_init")
 	public ResponseEntity<AckResponse> onInit(@RequestBody OnInitRequest onRequest) throws Exception {
 
 		LOGGER.info("Inside on_init API ");
@@ -195,7 +226,9 @@ public class DHPController {
 
 	}
 
-	@PostMapping("/on_confirm")
+	@MessageMapping("/on_confirm")
+	@SendTo("/client/flutter")
+//	@PostMapping("/on_confirm")
 	public ResponseEntity<AckResponse> onConfirm(@RequestBody OnConfirmRequest onRequest) throws Exception {
 
 		LOGGER.info("Inside on_confirm API ");
@@ -231,8 +264,10 @@ public class DHPController {
 
 	}
 
-	@PostMapping("/on_status")
-	public ResponseEntity<AckResponse> onStatus(@RequestBody OnStatusRequest onRequest) throws Exception {
+	@MessageMapping("/on_status")
+	@SendTo("/client/flutter")
+//	@PostMapping("/on_status")
+	public ResponseEntity<AckResponse> onStatus(EuaRequestBodyStatus onStatusRequest) throws Exception {
 
 		LOGGER.info("Inside on_status API ");
 
@@ -242,9 +277,9 @@ public class DHPController {
 
 		try {
 
-			String onRequestString = ow.writeValueAsString(onRequest);
+			String onRequestString = ow.writeValueAsString(onStatusRequest);
 
-			String requestMessageId = onRequest.context.message_id;
+			String requestMessageId = onStatusRequest.getContext().getMessage_id();
 
 			LOGGER.info("Request Body :" + onRequestString);
 
@@ -267,8 +302,10 @@ public class DHPController {
 
 	}
 
-	@PostMapping(value = "/search", consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> search(@RequestBody EuaRequestBody searchRequest) throws Exception {
+	@MessageMapping("/search")
+	@SendTo("/client/flutter")
+//	@PostMapping(value = "/search", consumes = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> search(EuaRequestBody searchRequest) throws Exception {
 
 		LOGGER.info("Inside Search API ");
 		String url;
@@ -289,11 +326,13 @@ public class DHPController {
 
 			String requestMessageId = searchRequest.getContext().getMessage_id();
 
+			String clientId = searchRequest.getClientId();
+
 			LOGGER.info("Request Body :" + onRequestString);
-			url = abdmGatewayURl + "/search";
+			url = abdmGatewayURl + "/ack";
 
 			Message _message = messageRepository
-					.save(new Message(requestMessageId, "", "search", Timestamp.from(ZonedDateTime.now().toInstant())));
+					.save(new Message(requestMessageId, "", "on_search", Timestamp.from(ZonedDateTime.now().toInstant()), clientId));
 
 			LOGGER.info("Request Body :" + onRequestString);
 
@@ -316,10 +355,12 @@ public class DHPController {
 
 		}
 		return ResponseEntity.status(HttpStatus.OK)
-				.body(getAckResponseResponseEntity(objectMapper, url, searchRequest));
+				.body(getAckResponseResponseEntity(url, searchRequest));
 	}
 
-	@PostMapping("/select")
+	@MessageMapping("/select")
+	@SendTo("/client/flutter")
+//	@PostMapping("/select")
 	public ResponseEntity<?> select(@RequestBody EuaRequestBody selectRequest) throws Exception {
 
 		LOGGER.info("Inside select API ");
@@ -340,6 +381,7 @@ public class DHPController {
 			String onRequestString = ow.writeValueAsString(selectRequest);
 
 			String requestMessageId = selectRequest.getContext().getMessage_id();
+			String clientId = selectRequest.getClientId();
 
 			LOGGER.info("Provider URI :" + providerURI);
 
@@ -347,7 +389,7 @@ public class DHPController {
 			url = providerURI + "/select";
 
 			Message _message = messageRepository
-					.save(new Message(requestMessageId, "", "select", Timestamp.from(ZonedDateTime.now().toInstant())));
+					.save(new Message(requestMessageId, "", "on_select", Timestamp.from(ZonedDateTime.now().toInstant()),clientId));
 
 //            HttpRequest request = HttpRequest.newBuilder()
 //                    .uri(URI.create(providerURI + "/select"))
@@ -368,20 +410,25 @@ public class DHPController {
 
 		}
 		return ResponseEntity.status(HttpStatus.OK)
-				.body(getAckResponseResponseEntity(objectMapper, url, selectRequest));
+				.body(getAckResponseResponseEntity(url, selectRequest));
 	}
 
-	private Mono<AckResponse> getAckResponseResponseEntity(ObjectMapper objectMapper, String url,
-			EuaRequestBody initRequest) throws java.io.IOException, InterruptedException {
+	private AckResponse getAckResponseResponseEntity(String url,
+													 EuaRequestBody initRequest) {
+
 		Mono<AckResponse> ackResponseMono = webClient.post().uri(url).body(Mono.just(initRequest), AckResponse.class)
 				.retrieve() // By default .retrieve() will check for error statuses for you.
 				.bodyToMono(AckResponse.class);
+//		AckResponse response = new AckResponse();
+//		return ackResponseMono.doOnSuccess(ackResponse -> {return ackResponse;}).subscribe();
 
-		return ackResponseMono;
+		return ackResponseMono.block();
 
 	}
 
-	@PostMapping("/init")
+	@MessageMapping("/init")
+	@SendTo("/client/flutter")
+//	@PostMapping("/init")
 	public ResponseEntity<?> init(@RequestBody EuaRequestBody initRequest) throws Exception {
 		String url;
 		LOGGER.info("Inside init API ");
@@ -401,13 +448,14 @@ public class DHPController {
 			String onRequestString = ow.writeValueAsString(initRequest);
 
 			String requestMessageId = initRequest.getContext().getMessage_id();
+			String clientId = initRequest.getClientId();
 
 			LOGGER.info("Provider URI :" + providerURI);
 
 			LOGGER.info("Request Body :" + onRequestString);
 
 			Message _message = messageRepository
-					.save(new Message(requestMessageId, "", "init", Timestamp.from(ZonedDateTime.now().toInstant())));
+					.save(new Message(requestMessageId, "", "on_init", Timestamp.from(ZonedDateTime.now().toInstant()), clientId));
 
 			url = providerURI + "/init";
 
@@ -429,10 +477,12 @@ public class DHPController {
 			return ResponseEntity.status(HttpStatus.OK).body(onSearchAck);
 
 		}
-		return ResponseEntity.status(HttpStatus.OK).body(getAckResponseResponseEntity(objectMapper, url, initRequest));
+		return ResponseEntity.status(HttpStatus.OK).body(getAckResponseResponseEntity(url, initRequest));
 	}
 
-	@PostMapping("/confirm")
+	@MessageMapping("/confirm")
+	@SendTo("/client/flutter")
+//	@PostMapping("/confirm")
 	public ResponseEntity<?> confirm(@RequestBody EuaRequestBody confirmRequest) throws Exception {
 		String url;
 		LOGGER.info("Inside confirm API ");
@@ -451,6 +501,7 @@ public class DHPController {
 			String onRequestString = ow.writeValueAsString(confirmRequest);
 
 			String requestMessageId = confirmRequest.getContext().getMessage_id();
+			String clientId = confirmRequest.getClientId();
 
 			LOGGER.info("Provider URI :" + providerURI);
 
@@ -459,7 +510,7 @@ public class DHPController {
 			url = providerURI + "/confirm";
 
 			Message _message = messageRepository.save(
-					new Message(requestMessageId, "", "confirm", Timestamp.from(ZonedDateTime.now().toInstant())));
+					new Message(requestMessageId, "", "on_confirm", Timestamp.from(ZonedDateTime.now().toInstant()),clientId));
 
 //            HttpRequest request = HttpRequest.newBuilder()
 //                    .uri(URI.create(providerURI + "/confirm"))
@@ -480,10 +531,12 @@ public class DHPController {
 
 		}
 		return ResponseEntity.status(HttpStatus.OK)
-				.body(getAckResponseResponseEntity(objectMapper, url, confirmRequest));
+				.body(getAckResponseResponseEntity(url, confirmRequest));
 	}
 
-	@PostMapping("/status")
+	@MessageMapping("/status")
+	@SendTo("/client/flutter")
+//	@PostMapping("/status")
 	public ResponseEntity<?> status(@RequestBody EuaRequestBody statusRequest) throws Exception {
 
 		String url;
@@ -506,6 +559,8 @@ public class DHPController {
 
 			String requestMessageId = statusRequest.getContext().getMessage_id();
 
+			String clientId = statusRequest.getClientId();
+
 			LOGGER.info("Provider URI :" + providerURI);
 
 			LOGGER.info("Request Body :" + onRequestString);
@@ -513,7 +568,7 @@ public class DHPController {
 			url = providerURI + "/status";
 
 			Message _message = messageRepository
-					.save(new Message(requestMessageId, "", "status", Timestamp.from(ZonedDateTime.now().toInstant())));
+					.save(new Message(requestMessageId, "", "on_status", Timestamp.from(ZonedDateTime.now().toInstant()), clientId));
 
 //            HttpRequest request = HttpRequest.newBuilder()
 //                    .uri(URI.create(providerURI + "/status"))
@@ -534,7 +589,7 @@ public class DHPController {
 
 		}
 		return ResponseEntity.status(HttpStatus.OK)
-				.body(getAckResponseResponseEntity(objectMapper, url, statusRequest));
+				.body(getAckResponseResponseEntity(url, statusRequest));
 	}
 
 }

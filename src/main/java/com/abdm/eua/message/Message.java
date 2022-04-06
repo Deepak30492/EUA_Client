@@ -17,6 +17,10 @@ public class Message {
     @JsonProperty("message_id")
     private String messageId;
 
+    @Column(nullable = false, columnDefinition = "text")
+    @JsonProperty("client_id")
+    private String clientId;
+
     @Column(columnDefinition = "text")
     @JsonProperty("response")
     private String response;
@@ -31,7 +35,7 @@ public class Message {
 
     public Message() {};
 
-    public Message(String message_id, String response, String dhp_query_type, Timestamp created_at){
+    public Message(String message_id, String response, String dhp_query_type, Timestamp created_at, String clientId){
 
         this.messageId = message_id;
 
@@ -40,6 +44,7 @@ public class Message {
         this.dhpQueryType = dhp_query_type;
 
         this.createdAt = created_at;
+        this.clientId = clientId;
 
     }
 
@@ -92,4 +97,11 @@ public class Message {
         this.createdAt = createdAt;
     }
 
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
 }

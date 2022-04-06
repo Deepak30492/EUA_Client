@@ -1,5 +1,8 @@
 package com.abdm.eua.dhp.schema.ack;
 
+import lombok.Data;
+
+@Data
 public class Message{
-    public Ack ack;
+    private Ack ack;
 }

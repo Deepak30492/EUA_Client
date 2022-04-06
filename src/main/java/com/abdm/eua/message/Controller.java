@@ -37,7 +37,7 @@ public class Controller {
 		try {
 
 			Message _message = messageRepository.save(new Message(message.getMessageId(), message.getResponse(),
-					message.getDhpQueryType(), Timestamp.from(ZonedDateTime.now().toInstant())));
+					message.getDhpQueryType(), Timestamp.from(ZonedDateTime.now().toInstant()), message.getClientId()));
 
 			return new ResponseEntity<>(_message, HttpStatus.CREATED);
 
@@ -79,12 +79,12 @@ public class Controller {
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<Optional<Message>> getMessageById(@PathVariable("id") String message_id,
-			@RequestParam("dhp_query_type") String dhp_query_type) {
+	public ResponseEntity<List<Optional<Message>>> getMessageById(@PathVariable("id") String message_id,
+			@RequestParam("dhp_query_type") String dhp_query_type, @RequestParam("client_id") String clientId) {
 
 		try {
 
-			Optional<Message> message = messageRepository.findByMessageIdAndDhpQueryType(message_id, dhp_query_type);
+			List<Optional<Message>> message = messageRepository.findByDhpQueryTypeAndClientId(dhp_query_type, clientId);
 
 			if (message.isEmpty()) {
 
