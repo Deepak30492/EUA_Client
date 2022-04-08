@@ -68,7 +68,7 @@ public class EuaController {
 	public ResponseEntity<List<Optional<Message>>> getMessageById(Message message) {
 		try {
 
-			List<Optional<Message>> messageFromDb = messageRepository.findByDhpQueryTypeAndClientId(message.getDhpQueryType(), message.getClientId());
+			List<Optional<Message>> messageFromDb = messageRepository.findByDhpQueryTypeAndClientId(message.getDhpQueryType(), message.getConsumerId());
 
 
 			if (messageFromDb.isEmpty()) {
@@ -318,7 +318,7 @@ public class EuaController {
 
 			String requestMessageId = searchRequest.getContext().getMessage_id();
 
-			String clientId = searchRequest.getClientId();
+			String clientId = searchRequest.getContext().getConsumer_id();
 
 			LOGGER.info("Request Body :" + onRequestString);
 			url = abdmGatewayURl + SEARCH_ENDPOINT;
@@ -364,7 +364,7 @@ public class EuaController {
 			String onRequestString = ow.writeValueAsString(selectRequest);
 
 			String requestMessageId = selectRequest.getContext().getMessage_id();
-			String clientId = selectRequest.getClientId();
+			String clientId = selectRequest.getContext().getConsumer_id();
 
 			LOGGER.info("Provider URI :" + providerURI);
 
@@ -420,7 +420,7 @@ public class EuaController {
 			String onRequestString = ow.writeValueAsString(initRequest);
 
 			String requestMessageId = initRequest.getContext().getMessage_id();
-			String clientId = initRequest.getClientId();
+			String clientId = initRequest.getContext().getConsumer_id();
 
 			LOGGER.info("Provider URI :" + providerURI);
 
@@ -464,7 +464,7 @@ public class EuaController {
 			String onRequestString = ow.writeValueAsString(confirmRequest);
 
 			String requestMessageId = confirmRequest.getContext().getMessage_id();
-			String clientId = confirmRequest.getClientId();
+			String clientId = confirmRequest.getContext().getConsumer_id();
 
 			LOGGER.info("Provider URI :" + providerURI);
 
@@ -514,7 +514,7 @@ public class EuaController {
 
 			String requestMessageId = statusRequest.getContext().getMessage_id();
 
-			String clientId = statusRequest.getClientId();
+			String clientId = statusRequest.getContext().getConsumer_id();
 
 			LOGGER.info("Provider URI :" + providerURI);
 

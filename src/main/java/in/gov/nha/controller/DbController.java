@@ -37,7 +37,7 @@ public class DbController {
 		try {
 
 			Message _message = messageRepository.save(new Message(message.getMessageId(), message.getResponse(),
-					message.getDhpQueryType(), Timestamp.from(ZonedDateTime.now().toInstant()), message.getClientId()));
+					message.getDhpQueryType(), Timestamp.from(ZonedDateTime.now().toInstant()), message.getConsumerId()));
 
 			return new ResponseEntity<>(_message, HttpStatus.CREATED);
 

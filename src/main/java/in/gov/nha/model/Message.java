@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.persistence.*;
 import java.sql.Timestamp;
 
-@Table(schema = "eua", uniqueConstraints = {@UniqueConstraint(name = "MessageIdAndDHPQueryTypeUniqueConstraint", columnNames = {"messageId", "dhpQueryType"})})
+@Table(schema = "eua")
 @Entity
 public class Message {
 
@@ -18,8 +18,8 @@ public class Message {
     private String messageId;
 
     @Column(nullable = false, columnDefinition = "text")
-    @JsonProperty("client_id")
-    private String clientId;
+    @JsonProperty("consumer_id")
+    private String consumerId;
 
     @Column(columnDefinition = "text")
     @JsonProperty("response")
@@ -44,7 +44,7 @@ public class Message {
         this.dhpQueryType = dhp_query_type;
 
         this.createdAt = created_at;
-        this.clientId = clientId;
+        this.consumerId = clientId;
 
     }
 
@@ -97,11 +97,11 @@ public class Message {
         this.createdAt = createdAt;
     }
 
-    public String getClientId() {
-        return clientId;
+    public String getConsumerId() {
+        return consumerId;
     }
 
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
+    public void setConsumerId(String clientId) {
+        this.consumerId = clientId;
     }
 }

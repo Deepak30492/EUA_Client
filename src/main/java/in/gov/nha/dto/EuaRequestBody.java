@@ -13,7 +13,5 @@ import lombok.ToString;
 public class EuaRequestBody {
     private Context context;
     private Message message;
-    @JsonProperty("client_id")
-    private String clientId;
 
 }
