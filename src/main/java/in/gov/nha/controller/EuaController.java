@@ -60,6 +60,8 @@ public class EuaController {
 
 	}
 
+
+
 	@MessageMapping("/get-response-by-msgId")
 	@SendTo("/client/flutter")
 	public ResponseEntity<List<Optional<Message>>> getMessageById(Message message) {
@@ -394,7 +396,7 @@ public class EuaController {
 	}
 
 	private AckResponse getAckResponseResponseEntity(String url,
-													 EuaRequestBody initRequest) {
+													EuaRequestBody initRequest) {
 
 		Mono<AckResponse> ackResponseMono = webClient.post().uri(url).body(Mono.just(initRequest), AckResponse.class)
 				.retrieve() // By default .retrieve() will check for error statuses for you.
