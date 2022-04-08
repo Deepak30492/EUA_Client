@@ -35,7 +35,7 @@ public class Message {
 
     public Message() {};
 
-    public Message(String message_id, String response, String dhp_query_type, Timestamp created_at, String clientId){
+    public Message(String message_id, String response, String dhp_query_type, Timestamp created_at, String consumerId){
 
         this.messageId = message_id;
 
@@ -44,7 +44,7 @@ public class Message {
         this.dhpQueryType = dhp_query_type;
 
         this.createdAt = created_at;
-        this.consumerId = clientId;
+        this.consumerId = consumerId;
 
     }
 

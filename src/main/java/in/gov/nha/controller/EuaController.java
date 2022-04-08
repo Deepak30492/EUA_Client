@@ -68,7 +68,7 @@ public class EuaController {
 	public ResponseEntity<List<Optional<Message>>> getMessageById(Message message) {
 		try {
 
-			List<Optional<Message>> messageFromDb = messageRepository.findByDhpQueryTypeAndClientId(message.getDhpQueryType(), message.getConsumerId());
+			List<Optional<Message>> messageFromDb = messageRepository.findByDhpQueryTypeAndConsumerId(message.getDhpQueryType(), message.getConsumerId());
 
 
 			if (messageFromDb.isEmpty()) {
@@ -141,6 +141,8 @@ public class EuaController {
 			Message message = messageData.get();
 
 			message.setResponse(onRequestString);
+
+			messageRepository.delete(message);
 
 			messageRepository.save(message);
 
@@ -310,7 +312,7 @@ public class EuaController {
 
 			LOGGER.info("Gateway URI :: " + abdmGatewayURl);
 
-			searchRequest.getContext().setConsumer_id(abdmEUAURl);
+//			searchRequest.getContext().setConsumer_id(abdmEUAURl);
 
 			searchRequest.getContext().setConsumer_uri(abdmEUAURl);
 
@@ -355,7 +357,7 @@ public class EuaController {
 
 		try {
 
-			selectRequest.getContext().setConsumer_id(abdmEUAURl);
+//			selectRequest.getContext().setConsumer_id(abdmEUAURl);
 
 			selectRequest.getContext().setConsumer_uri(abdmEUAURl);
 
@@ -411,7 +413,6 @@ public class EuaController {
 
 		try {
 
-			initRequest.getContext().setConsumer_id(abdmEUAURl);
 
 			initRequest.getContext().setConsumer_uri(abdmEUAURl);
 
@@ -455,7 +456,6 @@ public class EuaController {
 		ObjectMapper objectMapper = new ObjectMapper();
 		try {
 
-			confirmRequest.getContext().setConsumer_id(abdmEUAURl);
 
 			confirmRequest.getContext().setConsumer_uri(abdmEUAURl);
 
@@ -504,7 +504,6 @@ public class EuaController {
 
 		try {
 
-			statusRequest.getContext().setConsumer_id(abdmEUAURl);
 
 			statusRequest.getContext().setConsumer_uri(abdmEUAURl);
 

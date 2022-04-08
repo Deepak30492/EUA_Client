@@ -84,7 +84,7 @@ public class DbController {
 
 		try {
 
-			List<Optional<Message>> message = messageRepository.findByDhpQueryTypeAndClientId(dhp_query_type, clientId);
+			List<Optional<Message>> message = messageRepository.findByDhpQueryTypeAndConsumerId(dhp_query_type, clientId);
 
 			if (message.isEmpty()) {
 
