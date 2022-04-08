@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -88,8 +89,7 @@ public class EuaController {
 		}
 	}
 
-	@MessageMapping("/on_search")
-	@SendTo("/client/flutter")
+	@PostMapping("/on_search")
 	public ResponseEntity<AckResponse> onSearch(@RequestBody EuaRequestBody onSearchRequest) throws JsonProcessingException {
 
 		LOGGER.info("Inside on_search API ");
@@ -152,8 +152,7 @@ public class EuaController {
 
 		}
 	}
-	@MessageMapping("/on_select")
-	@SendTo("/client/flutter")
+	@PostMapping("/on_select")
 	public ResponseEntity<AckResponse> onSelect(@RequestBody EuaRequestBody onSelectRequest) throws JsonProcessingException {
 
 		LOGGER.info("Inside on_select API ");
@@ -189,9 +188,8 @@ public class EuaController {
 
 	}
 
-	@MessageMapping("/on_init")
-	@SendTo("/client/flutter")
-	public ResponseEntity<AckResponse> onInit(@RequestBody EuaRequestBody onInitRequest) throws JsonProcessingException {
+	@PostMapping("/on_init")
+	public ResponseEntity<AckResponse> onInit(@RequestBody EuaRequestBodyStatus onInitRequest) throws JsonProcessingException {
 
 		LOGGER.info("Inside on_init API ");
 
@@ -226,9 +224,8 @@ public class EuaController {
 
 	}
 
-	@MessageMapping("/on_confirm")
-	@SendTo("/client/flutter")
-	public ResponseEntity<AckResponse> onConfirm(@RequestBody EuaRequestBody onConfirmRequest) throws JsonProcessingException {
+	@PostMapping("/on_confirm")
+	public ResponseEntity<AckResponse> onConfirm(@RequestBody EuaRequestBodyStatus onConfirmRequest) throws JsonProcessingException {
 
 		LOGGER.info("Inside on_confirm API ");
 
@@ -263,9 +260,8 @@ public class EuaController {
 
 	}
 
-	@MessageMapping("/on_status")
-	@SendTo("/client/flutter")
-	public ResponseEntity<AckResponse> onStatus(EuaRequestBodyStatus onStatusRequest) throws JsonProcessingException {
+	@PostMapping("/on_status")
+	public ResponseEntity<AckResponse> onStatus(@RequestBody EuaRequestBodyStatus onStatusRequest) throws JsonProcessingException {
 
 		LOGGER.info("Inside on_status API ");
 
@@ -300,9 +296,8 @@ public class EuaController {
 
 	}
 
-	@MessageMapping("/search")
-	@SendTo("/client/flutter")
-	public ResponseEntity<?> search(EuaRequestBody searchRequest) throws JsonProcessingException {
+	@PostMapping("/search")
+	public ResponseEntity<?> search(@RequestBody EuaRequestBody searchRequest) throws JsonProcessingException {
 
 		LOGGER.info("Inside Search API ");
 		String url;
@@ -348,8 +343,7 @@ public class EuaController {
 				.body(getAckResponseResponseEntity(url, searchRequest));
 	}
 
-	@MessageMapping("/select")
-	@SendTo("/client/flutter")
+	@PostMapping("/select")
 	public ResponseEntity<?> select(@RequestBody EuaRequestBody selectRequest) throws JsonProcessingException {
 
 		LOGGER.info("Inside select API ");
@@ -406,8 +400,7 @@ public class EuaController {
 
 	}
 
-	@MessageMapping("/init")
-	@SendTo("/client/flutter")
+	@PostMapping("/init")
 	public ResponseEntity<?> init(@RequestBody EuaRequestBody initRequest) throws JsonProcessingException {
 		String url;
 		LOGGER.info("Inside init API ");
@@ -452,8 +445,7 @@ public class EuaController {
 		return ResponseEntity.status(HttpStatus.OK).body(getAckResponseResponseEntity(url, initRequest));
 	}
 
-	@MessageMapping("/confirm")
-	@SendTo("/client/flutter")
+	@PostMapping("/confirm")
 	public ResponseEntity<?> confirm(@RequestBody EuaRequestBody confirmRequest) throws JsonProcessingException {
 		String url;
 		LOGGER.info("Inside confirm API ");
@@ -499,8 +491,7 @@ public class EuaController {
 				.body(getAckResponseResponseEntity(url, confirmRequest));
 	}
 
-	@MessageMapping("/status")
-	@SendTo("/client/flutter")
+	@PostMapping("/status")
 	public ResponseEntity<?> status(@RequestBody EuaRequestBody statusRequest) throws JsonProcessingException {
 
 		String url;
