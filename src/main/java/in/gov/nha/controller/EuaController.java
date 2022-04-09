@@ -299,7 +299,7 @@ public class EuaController {
 	}
 
 	@PostMapping("/search")
-	public ResponseEntity<?> search(@RequestBody EuaRequestBody searchRequest) throws JsonProcessingException {
+	public ResponseEntity<AckResponse> search(@RequestBody EuaRequestBody searchRequest) throws JsonProcessingException {
 
 		LOGGER.info("Inside Search API ");
 		String url;
@@ -346,7 +346,7 @@ public class EuaController {
 	}
 
 	@PostMapping("/select")
-	public ResponseEntity<?> select(@RequestBody EuaRequestBody selectRequest) throws JsonProcessingException {
+	public ResponseEntity<AckResponse> select(@RequestBody EuaRequestBody selectRequest) throws JsonProcessingException {
 
 		LOGGER.info("Inside select API ");
 		String url;
@@ -403,7 +403,7 @@ public class EuaController {
 	}
 
 	@PostMapping("/init")
-	public ResponseEntity<?> init(@RequestBody EuaRequestBody initRequest) throws JsonProcessingException {
+	public ResponseEntity<AckResponse> init(@RequestBody EuaRequestBody initRequest) throws JsonProcessingException {
 		String url;
 		LOGGER.info("Inside init API ");
 
@@ -447,7 +447,7 @@ public class EuaController {
 	}
 
 	@PostMapping("/confirm")
-	public ResponseEntity<?> confirm(@RequestBody EuaRequestBody confirmRequest) throws JsonProcessingException {
+	public ResponseEntity<AckResponse> confirm(@RequestBody EuaRequestBody confirmRequest) throws JsonProcessingException {
 		String url;
 		LOGGER.info("Inside confirm API ");
 
@@ -492,7 +492,7 @@ public class EuaController {
 	}
 
 	@PostMapping("/status")
-	public ResponseEntity<?> status(@RequestBody EuaRequestBody statusRequest) throws JsonProcessingException {
+	public ResponseEntity<AckResponse> status(@RequestBody EuaRequestBody statusRequest) throws JsonProcessingException {
 
 		String url;
 
