@@ -63,31 +63,31 @@ public class EuaController {
 
 
 
-	@MessageMapping("/get-response-by-msgId")
-	@SendTo("/client/flutter")
-	public ResponseEntity<List<Optional<Message>>> getMessageById(Message message) {
-		try {
-
-			List<Optional<Message>> messageFromDb = messageRepository.findByDhpQueryTypeAndConsumerId(message.getDhpQueryType(), message.getConsumerId());
-
-
-			if (messageFromDb.isEmpty()) {
-
-				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-
-			} else {
-
-				return new ResponseEntity<>(messageFromDb, HttpStatus.OK);
-
-			}
-
-		} catch (Exception e) {
-
-			LOGGER.error(e.toString());
-
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
+//	@MessageMapping("/get-response-by-msgId")
+//	@SendTo("/client/flutter")
+//	public ResponseEntity<List<Optional<Message>>> getMessageById(Message message) {
+//		try {
+//
+//			List<Optional<Message>> messageFromDb = messageRepository.findByDhpQueryTypeAndConsumerId(message.getDhpQueryType(), message.getConsumerId());
+//
+//
+//			if (messageFromDb.isEmpty()) {
+//
+//				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//
+//			} else {
+//
+//				return new ResponseEntity<>(messageFromDb, HttpStatus.OK);
+//
+//			}
+//
+//		} catch (Exception e) {
+//
+//			LOGGER.error(e.toString());
+//
+//			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+//		}
+//	}
 
 	@PostMapping("/on_search")
 	public ResponseEntity<AckResponse> onSearch(@RequestBody EuaRequestBody onSearchRequest) throws JsonProcessingException {
@@ -106,10 +106,10 @@ public class EuaController {
 
 			LOGGER.info("Request Body :" + onRequestString);
 
-			Optional<Message> messageData = messageRepository
-					.findByMessageIdAndDhpQueryType(requestMessageId, "on_search");
+//			List<Optional<Message>> messageData = messageRepository
+//					.findByMessageIdAndDhpQueryType(requestMessageId, "on_search");
 
-			return getAckResponseResponseEntity(objectMapper, onRequestString, messageData);
+			return getOnAckResponseResponseEntity(objectMapper, onRequestString, "on_search");
 
 		} catch (Exception e) {
 
@@ -126,9 +126,8 @@ public class EuaController {
 	}
 
 	@NotNull
-	private ResponseEntity<AckResponse> getAckResponseResponseEntity(ObjectMapper objectMapper, String onRequestString,
-			Optional<Message> messageData) throws com.fasterxml.jackson.core.JsonProcessingException {
-		if (messageData.isEmpty()) {
+	private ResponseEntity<AckResponse> getOnAckResponseResponseEntity(ObjectMapper objectMapper, String onRequest, String dhpQueryType) throws com.fasterxml.jackson.core.JsonProcessingException {
+		if (onRequest == null) {
 
 			String onSearchAckJsonErrorString = "{ \"message\": { \"ack\": { \"status\": \"NACK\" } }, \"error\": { \"type\": \"\", \"code\": \"400\", \"path\": \"string\", \"message\": \"Message ID not present\" } }";
 
@@ -137,15 +136,25 @@ public class EuaController {
 			return new ResponseEntity<>(onSearchAck, HttpStatus.OK);
 
 		} else {
+			EuaRequestBody euaRequestBody;
+			EuaRequestBodyStatus euaRequestBodyStatus;
+			if(dhpQueryType.equals("on_init") || dhpQueryType.equals("on_confirm") || dhpQueryType.equals("on_status")) {
+				euaRequestBodyStatus = objectMapper.readValue(onRequest, EuaRequestBodyStatus.class);
+				messageRepository.save(new Message(euaRequestBodyStatus.getContext().getMessage_id(), onRequest, dhpQueryType,Timestamp.from(ZonedDateTime.now().toInstant()),euaRequestBodyStatus.getContext().getConsumer_id()));
 
-			Message message = messageData.get();
+			}
+			if(dhpQueryType.equals("on_search") || dhpQueryType.equals("on_select")) {
+				euaRequestBody = objectMapper.readValue(onRequest, EuaRequestBody.class);
+				messageRepository.save(new Message(euaRequestBody.getContext().getMessage_id(), onRequest, dhpQueryType, Timestamp.from(ZonedDateTime.now().toInstant()),euaRequestBody.getContext().getConsumer_id()));
 
-			message.setResponse(onRequestString);
+			}
 
-			messageRepository.delete(message);
+//			Optional<Message> message = messageData.get(messageData.size()-1);
+//			if(Optional.ofNullable(message).isPresent()) {
+//				Message messageFromDb = message.get();
+//				messageFromDb.setResponse(onRequestString);
 
-			messageRepository.save(message);
-
+//			}
 			String onRequestAckJsonString = "{ \"message\": { \"ack\": { \"status\": \"ACK\" } } }";
 
 			AckResponse onSearchAck = objectMapper.readValue(onRequestAckJsonString, AckResponse.class);
@@ -171,10 +180,10 @@ public class EuaController {
 
 			LOGGER.info("Request Body :" + onRequestString);
 
-			Optional<Message> messageData = messageRepository
-					.findByMessageIdAndDhpQueryType(requestMessageId, "on_select");
+//			List<Optional<Message>> messageData = messageRepository
+//					.findByMessageIdAndDhpQueryType(requestMessageId, "on_select");
 
-			return getAckResponseResponseEntity(objectMapper, onRequestString, messageData);
+			return getOnAckResponseResponseEntity(objectMapper, onRequestString, "on_select");
 
 		} catch (Exception e) {
 
@@ -207,10 +216,10 @@ public class EuaController {
 
 			LOGGER.info("Request Body :" + onRequestString);
 
-			Optional<Message> messageData = messageRepository
-					.findByMessageIdAndDhpQueryType(requestMessageId, "on_init");
+//			List<Optional<Message>> messageData = messageRepository
+//					.findByMessageIdAndDhpQueryType(requestMessageId, "on_init");
 
-			return getAckResponseResponseEntity(objectMapper, onRequestString, messageData);
+			return getOnAckResponseResponseEntity(objectMapper, onRequestString, "on_init");
 
 		} catch (Exception e) {
 
@@ -243,10 +252,10 @@ public class EuaController {
 
 			LOGGER.info("Request Body :" + onRequestString);
 
-			Optional<Message> messageData = messageRepository
-					.findByMessageIdAndDhpQueryType(requestMessageId, "on_confirm");
+//			List<Optional<Message>> messageData = messageRepository
+//					.findByMessageIdAndDhpQueryType(requestMessageId, "on_confirm");
 
-			return getAckResponseResponseEntity(objectMapper, onRequestString, messageData);
+			return getOnAckResponseResponseEntity(objectMapper, onRequestString, "on_confirm");
 
 		} catch (Exception e) {
 
@@ -279,10 +288,10 @@ public class EuaController {
 
 			LOGGER.info("Request Body :" + onRequestString);
 
-			Optional<Message> messageData = messageRepository
-					.findByMessageIdAndDhpQueryType(requestMessageId, "on_status");
+//			List<Optional<Message>> messageData = messageRepository
+//					.findByMessageIdAndDhpQueryType(requestMessageId, "on_status");
 
-			return getAckResponseResponseEntity(objectMapper, onRequestString, messageData);
+			return getOnAckResponseResponseEntity(objectMapper, onRequestString, "on_status");
 
 		} catch (Exception e) {
 
@@ -325,8 +334,8 @@ public class EuaController {
 			LOGGER.info("Request Body :" + onRequestString);
 			url = abdmGatewayURl + SEARCH_ENDPOINT;
 
-			messageRepository
-					.save(new Message(requestMessageId, "", "on_search", Timestamp.from(ZonedDateTime.now().toInstant()), clientId));
+//			messageRepository
+//					.save(new Message(requestMessageId, "", "on_search", Timestamp.from(ZonedDateTime.now().toInstant()), clientId));
 
 			LOGGER.info("Request Body :" + onRequestString);
 
@@ -373,8 +382,8 @@ public class EuaController {
 			LOGGER.info("Request Body :" + onRequestString);
 			url = providerURI + SELECT_ENDPOINT;
 
-			messageRepository
-					.save(new Message(requestMessageId, "", "on_select", Timestamp.from(ZonedDateTime.now().toInstant()), clientId));
+//			messageRepository
+//					.save(new Message(requestMessageId, "", "on_select", Timestamp.from(ZonedDateTime.now().toInstant()), clientId));
 
 		} catch (Exception e) {
 
@@ -427,8 +436,8 @@ public class EuaController {
 
 			LOGGER.info("Request Body :" + onRequestString);
 
-			messageRepository
-					.save(new Message(requestMessageId, "", "on_init", Timestamp.from(ZonedDateTime.now().toInstant()), clientId));
+//			messageRepository
+//					.save(new Message(requestMessageId, "", "on_init", Timestamp.from(ZonedDateTime.now().toInstant()), clientId));
 
 			url = providerURI + INIT_ENDPOINT;
 
@@ -472,8 +481,8 @@ public class EuaController {
 
 			url = providerURI + CONFIRM_ENDPOINT;
 
-			messageRepository.save(
-					new Message(requestMessageId, "", "on_confirm", Timestamp.from(ZonedDateTime.now().toInstant()), clientId));
+//			messageRepository.save(
+//					new Message(requestMessageId, "", "on_confirm", Timestamp.from(ZonedDateTime.now().toInstant()), clientId));
 
 
 		} catch (Exception e) {
@@ -521,8 +530,8 @@ public class EuaController {
 
 			url = providerURI + STATUS_ENDPOINT;
 
-			messageRepository
-					.save(new Message(requestMessageId, "", "on_status", Timestamp.from(ZonedDateTime.now().toInstant()), clientId));
+//			messageRepository
+//					.save(new Message(requestMessageId, "", "on_status", Timestamp.from(ZonedDateTime.now().toInstant()), clientId));
 
 
 		} catch (Exception e) {

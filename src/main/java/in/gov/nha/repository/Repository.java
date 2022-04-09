@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface Repository extends JpaRepository<Message, Long> {
 
-    Optional<Message> findByMessageIdAndDhpQueryType(String messageId, String DhpQueryType);
+//    List<Optional<Message>> findByMessageIdAndDhpQueryType(String messageId, String DhpQueryType);
 
-    List<Optional<Message>> findByDhpQueryTypeAndConsumerId(String dhp_query_type, String clientId);
+     List<Optional<Message>> findByMessageId(String messageId);
 }

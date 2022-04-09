@@ -54,11 +54,9 @@ public class DbController {
 	@GetMapping
 	public ResponseEntity<List<Message>> getAll() {
 
-		List<Message> messages = new ArrayList<Message>();
-
 		try {
 
-			messageRepository.findAll().forEach(messages::add);
+			List<Message> messages = new ArrayList<>(messageRepository.findAll());
 
 			if (messages.isEmpty()) {
 
@@ -79,12 +77,11 @@ public class DbController {
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<List<Optional<Message>>> getMessageById(@PathVariable("id") String message_id,
-			@RequestParam("dhp_query_type") String dhp_query_type, @RequestParam("client_id") String clientId) {
+	public ResponseEntity<List<Optional<Message>>> getMessageById(@PathVariable("id") String message_id) {
 
 		try {
 
-			List<Optional<Message>> message = messageRepository.findByDhpQueryTypeAndConsumerId(dhp_query_type, clientId);
+			List<Optional<Message>> message = messageRepository.findByMessageId(message_id);
 
 			if (message.isEmpty()) {
 
